@@ -1,8 +1,23 @@
-import Card from "./components/Card";
-import Drawer from "./components/Drawer";
+import { useEffect, useState } from "react";
+import Card from "./components/Card/Card";
+import Drawer from "./components/Drawer/Drawer";
 import Header from "./components/Header";
+import PostSerivce from "./API/PostService";
+
+
 
 export default function App() {
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    async function fetchSneakers() {
+      const sneakers = await PostSerivce.getSneakers();
+      setItems(sneakers);
+    }
+
+    fetchSneakers();
+  }, [])
+
   return (
     <div className="wrapper clear">
       <Drawer />
@@ -17,8 +32,15 @@ export default function App() {
           </div>
         </div>
 
-        <div className="d-flex">
-          <Card />
+        <div className="d-flex flex-wrap">
+          {items.map(data =>
+            <Card
+              key={data.id}
+              title={data.title}
+              price={data.price}
+              imageUrl={data.imageUrl}
+            />
+          )}
         </div>
 
       </div>
