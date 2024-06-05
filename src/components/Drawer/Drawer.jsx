@@ -1,24 +1,24 @@
 import cl from './DrawerStyles/Drawer.module.css'
 
-export default function Drawer() {
+export default function Drawer({ onClose, items = [] }) {
   return (
-    <div style={{ display: 'none' }} className={cl.overlay}>
-      <div className={cl.drawer}>
+    <div className={cl.overlay} onClick={onClose}>
+      <div className={cl.drawer} onClick={(e) => e.stopPropagation()}>
         <h2 className="mb-30 d-flex justify-between">
-          Корзина <img className="cu-p" src="/img/btn-remove.svg" alt="Remove" />
+          Корзина <img onClick={onClose} className="cu-p" src="/img/btn-remove.svg" alt="Remove" />
         </h2>
 
         <div className={cl.items}>
-          <div className="cartItem d-flex align-center mb-20">
-            <div style={{ backgroundImage: 'url(/img/sneakers-1.jpg)' }} className={cl.cartItemImg}></div>
-            <div className="mr-20 flex">
-              <p className="mb-5">Мужские Кроссовки Nike Air Max 270</p>
-              <b>12 999 rub.</b>
+          {items.map(item =>
+            <div key={item.id} className="cartItem d-flex align-center mb-20">
+              <div style={{ backgroundImage: `url(${item.imageUrl})` }} className={cl.cartItemImg}></div>
+              <div className="mr-20 flex">
+                <p className="mb-5">{item.title}</p>
+                <b>{item.price}</b>
+              </div>
+              <img className={cl.removeBtn} src="/img/btn-remove.svg" alt="Remove" />
             </div>
-            <img className={cl.removeBtn} src="/img/btn-remove.svg" alt="Remove" />
-          </div>
-
-
+          )}
         </div>
 
         <div className='cartTotalBlock'>

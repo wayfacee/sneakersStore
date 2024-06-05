@@ -1,4 +1,4 @@
-export default function Header() {
+export default function Header({onClickCart}) {
   return (
     <header className="d-flex justify-between align-center p-40">
 
@@ -13,7 +13,7 @@ export default function Header() {
 
 
       <ul className='d-flex'>
-        <li className="mr-30 cu-p">
+        <li className="mr-30 cu-p" onClick={onClickCart}>
           <img style={{ width: 18, height: 18 }} src="/img/cart.svg" alt="cart" />
           <span>1205 rub.</span>
         </li>

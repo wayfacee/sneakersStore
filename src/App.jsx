@@ -4,10 +4,10 @@ import Drawer from "./components/Drawer/Drawer";
 import Header from "./components/Header";
 import PostSerivce from "./API/PostService";
 
-
-
 export default function App() {
   const [items, setItems] = useState([]);
+  const [cartOpened, setCartOpened] = useState(false)
+  const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
     async function fetchSneakers() {
@@ -18,10 +18,15 @@ export default function App() {
     fetchSneakers();
   }, [])
 
+  function onAddToCart(obj) {
+    console.log(obj)
+    setCartItems([...cartItems, obj]);
+  }
+
   return (
     <div className="wrapper clear">
-      <Drawer />
-      <Header />
+      {cartOpened && <Drawer items={cartItems} onClose={() => setCartOpened(false)} />}
+      <Header onClickCart={() => setCartOpened(true)} />
 
       <div className='content p-40'>
         <div className="d-flex align-center justify-between mb-40">
@@ -39,6 +44,7 @@ export default function App() {
               title={data.title}
               price={data.price}
               imageUrl={data.imageUrl}
+              onPlus={onAddToCart}
             />
           )}
         </div>
