@@ -3,7 +3,6 @@ import data from '../server/db.json'
 
 export default function Home({
   items,
-  cartItems,
   searchValue,
   setSearchValue,
   onChangeSearchInput,
@@ -11,6 +10,7 @@ export default function Home({
   onAddToCart,
   isLoading
 }) {
+
 
   function renderItems() {
     const filtredItems = items.filter(item => item.title.toLowerCase().includes(searchValue.toLowerCase()))
@@ -20,7 +20,6 @@ export default function Home({
           key={index}
           onFavorite={(obj) => onAddToFavorite(obj)}
           onPlus={(obj) => onAddToCart(obj)}
-          added={cartItems.some(obj => Number(obj.id) === Number(item.id))}
           loading={isLoading}
           {...item}
         />

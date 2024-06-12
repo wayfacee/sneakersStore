@@ -7,6 +7,8 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Favoties from "./pages/Favorites";
 import { AppContext } from "./context";
+import Favorites from "./pages/Favorites";
+import Orders from "./pages/Orders";
 
 export default function App() {
   const [items, setItems] = useState([]);
@@ -14,17 +16,18 @@ export default function App() {
   const [cartItems, setCartItems] = useState([]);
   const [favorites, setFavorites] = useState([])
   const [searchValue, setSearchValue] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchData() {
       try {
-        setIsLoading(true);
         // сделали так чтобы, коризна и фаориты, грузились,
         // а потом рендерился айтемс
-        const cartResponse = await axios.get('http://localhost:3001/cart')
-        const favoritesResponse = await axios.get('http://localhost:3001/favorites')
-        const itemsResponse = await axios.get('http://localhost:3001/sneakers')
+        const [cartResponse, favoritesResponse, itemsResponse] = await Promise.all([
+          axios.get('http://localhost:3001/cart'),
+          axios.get('http://localhost:3001/favorites'),
+          axios.get('http://localhost:3001/sneakers')
+        ]);
 
         setCartItems(cartResponse.data)
         setFavorites(favoritesResponse.data)
@@ -38,29 +41,34 @@ export default function App() {
     fetchData()
   }, [])
 
-  function onAddToCart(obj) {
+  async function onAddToCart(obj) {
     try {
       if (cartItems.find(item => Number(item.id) === Number(obj.id))) {
-        axios.delete(`http://localhost:3001/cart/${obj.id}`)
         setCartItems(prev => prev.filter(item => Number(item.id) !== Number(obj.id)))
+        await axios.delete(`http://localhost:3001/cart/${obj.id}`)
       } else {
-        axios.post('http://localhost:3001/cart', obj)
         setCartItems([...cartItems, obj])
+        await axios.post('http://localhost:3001/cart', obj)
       }
     } catch (e) {
       console.log('onAddToCart', e)
     }
   }
 
-  function onRemoveItem(id) {
-    axios.delete(`http://localhost:3001/cart/${id}`)
-    setCartItems(prev => prev.filter(i => i.id !== id))
+  async function onRemoveItem(id) {
+    try {
+      setCartItems(prev => prev.filter(i => i.id !== id))
+      await axios.delete(`http://localhost:3001/cart/${id}`)
+    } catch (e) {
+      console.log('onRemoveItem', e)
+    }
   }
 
   async function onAddToFavorite(obj) {
     try {
-      if (favorites.find(f => f.id === obj.id)) {
-        axios.delete(`http://localhost:3001/favorites/${obj.id}`)
+      if (favorites.find(f => Number(f.id) === Number(obj.id))) {
+        await axios.delete(`http://localhost:3001/favorites/${obj.id}`)
+        setFavorites(prev => prev.filter(item => Number(item.id) !== Number(obj.id)))
       } else {
         const { data } = await axios.post('http://localhost:3001/favorites', obj);
         setFavorites(prev => [...prev, data])
@@ -74,12 +82,17 @@ export default function App() {
     setSearchValue(e.target.value);
   }
 
+  function isItemAdded(id) {
+    return cartItems.some(obj => Number(obj.id) === Number(id))
+  }
+
   return (
     <AppContext.Provider
       value={{
         items,
         cartItems,
         favorites,
+        isItemAdded,
         onAddToFavorite,
         onAddToCart,
         setCartOpened,
@@ -87,7 +100,8 @@ export default function App() {
       }}>
 
       <div className="wrapper clear">
-        {cartOpened && <Drawer items={cartItems} onClose={() => setCartOpened(false)} onRemove={onRemoveItem} />}
+        <Drawer items={cartItems} onClose={() => setCartOpened(false)} onRemove={onRemoveItem} opened={cartOpened} />
+
         <Header onClickCart={() => setCartOpened(true)} />
 
         <Routes>
@@ -105,7 +119,8 @@ export default function App() {
                 isLoading={isLoading}
               />
             } />
-          <Route path="/favorites" element={<Favoties items={favorites} onAddToFavorite={onAddToFavorite} />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/orders" element={<Orders />} />
         </Routes>
 
 
